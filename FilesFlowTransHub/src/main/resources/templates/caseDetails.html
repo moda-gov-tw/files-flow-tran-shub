@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>案件詳細資料</title>
+
+<!-- Bootstrap CSS -->
+<link
+	href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+	rel="stylesheet">
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+	<!-- 共用選單 -->
+	<div th:replace="~{fragments :: menu}"></div>
+
+	<div class="container">
+		<div class="card mx-auto" style="max-width: 960px;">
+			<div class="card content-card p-4">
+				<h2 class="text-center">案件詳細資料</h2>
+
+				<!-- 分頁導覽 -->
+				<ul class="nav nav-tabs" id="caseDetailsTabs" role="tablist">
+					<li class="nav-item"><a class="nav-link active"
+						id="caseMain-tab" data-bs-toggle="tab" href="#service" role="tab">服務明細</a>
+					</li>
+					<li class="nav-item"><a class="nav-link" id="caseDetails-tab"
+						data-bs-toggle="tab" href="#caseDetails" role="tab">案件明細</a></li>
+					<li class="nav-item"><a class="nav-link" id="fileDetails-tab"
+						data-bs-toggle="tab" href="#fileDetails" role="tab">檔案列表</a></li>
+					<li class="nav-item"><a class="nav-link" id="exceptions-tab"
+						data-bs-toggle="tab" href="#exceptions" role="tab">異常資訊</a></li>
+				</ul>
+
+				<div class="tab-content mt-3">
+					<!-- 第1個分頁：服務明細 -->
+					<div class="tab-pane fade show active" id="service" role="tabpanel"
+						aria-labelledby="service-tab">
+						<p>
+							<strong>服務代碼：</strong> <span th:text="${service.serviceId}"></span>
+						</p>
+						<p>
+							<strong>服務描述：</strong> <span
+								th:text="${service.serviceDescription}"></span>
+						</p>
+						<p>
+							<strong>服務名稱：</strong> <span th:text="${service.serviceName}"></span>
+						</p>
+					</div>
+
+					<!-- 第2個分頁：案件明細 -->
+					<div class="tab-pane fade" id="caseDetails" role="tabpanel"
+						aria-labelledby="caseDetails-tab">
+						<table class="table table-bordered table-striped">
+							<thead class="table-dark">
+								<tr>
+									<th>狀態</th>
+									<th>更新時間</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr th:each="detail : ${caseDetailsList}">
+									<td th:text="${detail.caseStatus}"></td>
+									<td
+										th:text="${#temporals.format(detail.updateDatetime, 'yyyy-MM-dd HH:mm:ss')}"></td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+
+					<!-- 第3個分頁：檔案列表 -->
+					<div class="tab-pane fade" id="fileDetails" role="tabpanel"
+						aria-labelledby="fileDetails-tab">
+						<table class="table table-bordered table-striped">
+							<thead class="table-dark">
+								<tr>
+									<th>檔案名稱</th>
+									<th>檔案大小</th>
+									<th>最後上傳時間</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr th:each="file : ${fileDetailsList}">
+									<td th:text="${file.fileName}"></td>
+									<td th:text="${file.fileSize}"></td>
+									<td
+										th:text="${#temporals.format(file.lastUploadDatetime, 'yyyy-MM-dd HH:mm:ss')}"></td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+
+					<!-- 第4個分頁：異常資訊 -->
+					<div class="tab-pane fade" id="exceptions" role="tabpanel"
+						aria-labelledby="exceptions-tab">
+						<table class="table table-bordered table-striped">
+							<thead class="table-dark">
+								<tr>
+									<th>異常時間</th>
+									<th>異常訊息</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr th:each="exception : ${exceptionList}">
+									<td
+										th:text="${#temporals.format(exception.exceptionDatetime, 'yyyy-MM-dd HH:mm:ss')}"></td>
+									<td th:text="${exception.exceptionMessage}"></td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- Bootstrap JS -->
+	<script
+		src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>

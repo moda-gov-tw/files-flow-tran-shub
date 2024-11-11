@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>檔案傳輸案件管理系統</title>
+
+<!-- Bootstrap CSS -->
+<link
+	href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+	rel="stylesheet">
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+	<!-- 導覽列 -->
+	<nav class="navbar navbar-expand-lg navbar-dark bg-dark"
+		th:fragment="menu">
+		<div class="container-fluid">
+			<a class="navbar-brand" href="#">檔案傳輸案件管理系統</a>
+			<button class="navbar-toggler" type="button"
+				data-bs-toggle="collapse" data-bs-target="#navbarNav"
+				aria-controls="navbarNav" aria-expanded="false"
+				aria-label="Toggle navigation">
+				<span class="navbar-toggler-icon"></span>
+			</button>
+
+			<div class="collapse navbar-collapse" id="navbarNav">
+				<ul class="navbar-nav ms-auto">
+					<li class="nav-item"><a class="nav-link"
+						th:href="@{/caseMainList}" href="#">傳輸紀錄</a></li>
+					<li class="nav-item"><a class="nav-link" th:href="@{/service}"
+						href="#">服務列表</a></li>
+					<li class="nav-item"><a class="nav-link"
+						th:href="@{/connection}" href="#">SFTP連線測試</a></li>
+					<li class="nav-item"><a class="nav-link"
+						th:href="@{/callService}" href="#">呼叫傳輸</a></li>
+				</ul>
+			</div>
+		</div>
+	</nav>
+
+	<!-- Bootstrap JS -->
+	<script
+		src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>

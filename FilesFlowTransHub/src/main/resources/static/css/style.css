@@ -1,0 +1,114 @@
+/* 全局背景設定 */
+body {
+	background-color: #f0f2f5;
+}
+
+/* 卡片樣式 */
+.card {
+	margin-top: 50px;
+	padding: 30px;
+	border-radius: 12px;
+	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* 標題樣式 */
+h2, h3 {
+	font-weight: 700;
+	color: #333;
+	margin-bottom: 30px;
+}
+
+/* 表格樣式 */
+.table {
+	margin-top: 20px;
+}
+
+.table th, .table td {
+	vertical-align: middle;
+	text-align: center;
+}
+
+.table-striped tbody tr:nth-of-type(odd) {
+	background-color: rgba(0, 0, 0, 0.05);
+}
+
+.table-hover tbody tr:hover {
+	background-color: rgba(0, 123, 255, 0.1);
+}
+
+/* 頁籤和按鈕樣式 */
+.nav-tabs .nav-link {
+	margin-right: 5px;
+}
+
+.navbar-nav .nav-link {
+	margin-right: 10px;
+	transition: color 0.3s, background-color 0.3s;
+}
+
+.navbar-nav .nav-link:hover {
+	background-color: rgba(255, 255, 255, 0.2);
+	border-radius: 5px;
+}
+
+.nav-link.active {
+	background-color: rgba(255, 255, 255, 0.3);
+	border-radius: 5px;
+}
+
+.btn-primary {
+	width: 100%;
+	transition: background-color 0.3s ease;
+}
+
+.btn-secondary {
+	width: 100%;
+	transition: background-color 0.3s ease;
+}
+
+.btn-primary:hover {
+	background-color: #0056b3;
+}
+
+.btn-info {
+	background-color: #17a2b8;
+	border: none;
+}
+
+.btn-info:hover {
+	background-color: #138496;
+}
+
+/* JSON 輸出框樣式 */
+#jsonOutput, pre {
+	background-color: #e9ecef;
+	padding: 15px;
+	border-radius: 5px;
+	max-height: 300px;
+	overflow-y: auto;
+}
+
+/* 載入狀態樣式 */
+.loading {
+	opacity: 0.6;
+	pointer-events: none;
+}
+
+/* 頁尾樣式 */
+footer {
+	margin-top: 30px;
+	padding: 10px 0;
+	text-align: center;
+	background-color: #f8f9fa;
+}
+
+/* Navbar 樣式 */
+.navbar-brand {
+	font-size: 1.5rem;
+	font-weight: bold;
+	letter-spacing: 1px;
+}
+
+.container-fluid {
+	padding: 10px 30px;
+}
