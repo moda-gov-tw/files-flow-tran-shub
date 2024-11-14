@@ -1,7 +1,6 @@
 package com.FilesFlowTransHub.util;
 
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.Base64;
 
 public class Base64Utils {
