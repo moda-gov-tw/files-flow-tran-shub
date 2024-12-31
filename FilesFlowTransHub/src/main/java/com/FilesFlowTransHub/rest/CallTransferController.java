@@ -7,6 +7,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -17,12 +18,16 @@ import com.FilesFlowTransHub.domain.ServiceMain;
 import com.FilesFlowTransHub.dto.ConnectionInfo;
 import com.FilesFlowTransHub.dto.FileInfo;
 import com.FilesFlowTransHub.dto.ResponseInfo;
+import com.FilesFlowTransHub.dto.ServiceRequest;
 import com.FilesFlowTransHub.service.CaseService;
 import com.FilesFlowTransHub.service.ExceptionService;
 import com.FilesFlowTransHub.service.FileService;
 import com.FilesFlowTransHub.service.ServiceService;
 import com.FilesFlowTransHub.util.SFTPFileTransUtils;
 import com.FilesFlowTransHub.util.SystemUtils;
+
+import jakarta.validation.Valid;
+
 import com.FilesFlowTransHub.service.FileTransferService;
 @RestController
 @RequestMapping("/api")
@@ -44,8 +49,18 @@ public class CallTransferController {
 	private FileTransferService fileTransferService;
 	
 	@PostMapping("/callService")
-	public ResponseInfo callService(@RequestBody Map<String, String> requestBody) {
-		String serviceId = requestBody.get("serviceId");
+	public ResponseInfo callService(@Valid @RequestBody ServiceRequest request, BindingResult result) {
+ 
+		if (result.hasErrors()) {
+			System.out.println(result.getFieldErrors());
+			ResponseInfo response = new ResponseInfo();
+			response.setStatusCode(CaseStatusConstEnum.ERROR.getKey());
+			response.setStatusMessage("請檢查所輸入的 serviceId 是否為 10 碼或是合規字元");
+			return response;
+		}
+		
+		String serviceId = request.getServiceId();
+		
 		ResponseInfo response = new ResponseInfo();
 
 		if (!serviceService.isServiceIdValid(serviceId)) {

@@ -1,6 +1,7 @@
 package com.FilesFlowTransHub.service;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -41,10 +42,33 @@ public class FileTransferService {
         }
 
         try {
+        	
+        	Path baseTargetDir = Paths.get(targetDir).toAbsolutePath().normalize();
+
+        	
             if (SFTPFileTransUtils.isConnectionSuccess(sourceInfo)) {
                 if (!fileNameList.isEmpty()) {
                     fileNameList.forEach(fileName -> {
                         System.out.println("開始下載檔案：" + fileName.getName());
+                        
+                        String localFilePath = "";
+						try {
+							localFilePath = new File(targetDir, fileName.getName()).getCanonicalPath();
+						} catch (IOException e) {
+							System.out.println(localFilePath + "is not exist");
+							e.printStackTrace();
+							updateStatusWithError(caseId, localFilePath + "is not exist" + e.getMessage());
+							return ;
+						}
+                        Path targetFilePath = Paths.get(localFilePath).toAbsolutePath().normalize();
+                        
+ 
+                        if (!targetFilePath.startsWith(baseTargetDir)) {
+                            System.out.println("無效的下載路徑：" + localFilePath);
+                            updateStatusWithError(caseId, "無效的下載路徑");
+                            return;  
+                        }
+                        
                         SFTPFileTransUtils.downFile(sourceInfo, fileName.getName(), targetDir);
                     });
                 } else {

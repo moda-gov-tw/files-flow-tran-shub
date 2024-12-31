@@ -6,6 +6,8 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -61,6 +63,11 @@ public class SFTPFileTransUtils {
      * @param path
      */
     private static void changeDir(ChannelSftp client, String path) {
+    	if (path.contains("..") || path.contains("\\")) {
+    		System.out.println("Invalid path detected: " + path);
+    	        throw new IllegalArgumentException("Invalid path detected: " + path);
+    	}
+    	
         try {
             // 路徑開頭為/ ,切換至根目錄
             if (path.startsWith("/")) {
@@ -167,17 +174,37 @@ public class SFTPFileTransUtils {
      * @param destDir
      */
     public static void downFile(ConnectionInfo info, String fileName, String destDir) {
+    	if (fileName.contains("..") || fileName.contains("/") || fileName.contains("\\")) {
+    		System.out.println("downFile Invalid file name: " + fileName);
+            throw new IllegalArgumentException("Invalid file name: " + fileName);
+        }
+    	
         ChannelSftp sftp = null;
         try {
             sftp = newSFtpConnect(info);
             
+            File destDirectory = new File(destDir);
+            if (!destDirectory.exists() || !destDirectory.isDirectory()) {
+            	System.out.println("downFile Invalid destination directory: " + destDir);
+                throw new Exception("Invalid destination directory: " + destDir);
+            }
+            
             // 下載
-            String localFilePath = destDir + "/" + fileName;
+            String localFilePath = new File(destDirectory, fileName).getCanonicalPath();
+            Path baseDestDir = Paths.get(destDir).toAbsolutePath().normalize(); 
+            Path targetFilePath = Paths.get(localFilePath).toAbsolutePath().normalize();
+            
+            if (!targetFilePath.startsWith(baseDestDir)) {
+                System.out.println("downFile Path traversal attempt detected for file: " + fileName);
+                throw new Exception("Invalid destination file path: " + localFilePath);
+            }
+            
+            
             try (OutputStream outputStream = new FileOutputStream(localFilePath)) {
                 sftp.get(fileName, outputStream);
                 System.out.println("File downloaded successfully to: " + localFilePath);
             } catch (IOException e) {
-                //System.out.println("Error writing to file: " + e.getMessage());
+                System.out.println("Error writing to file: " + e.getMessage());
             }
             
         } catch (Exception e) {
@@ -204,11 +231,21 @@ public class SFTPFileTransUtils {
 
             
             if (!file.exists() || !file.isFile()) {
-                throw new IllegalArgumentException("File does not exist: " + file.getAbsolutePath());
+                throw new Exception("File does not exist: " + file.getAbsolutePath());
             }
-
-             
-            uploadFile(sftp, file, info.getRemoteDir());
+            String remoteDir = info.getRemoteDir();
+            Path baseDir = Paths.get(remoteDir).toAbsolutePath().normalize(); 
+            if (baseDir.toString().contains("..")) {
+            //if (baseDir.toString().contains("..") || baseDir.toString().contains("\\")) {
+                System.out.println("uploadFiles Invalid remote directory: " + baseDir.toString());
+                throw new Exception("uploadFiles Invalid remote directory: " + baseDir.toString());
+            }
+            if (remoteDir.contains("..")) {
+            //if (remoteDir.contains("..") || remoteDir.contains("\\")) {
+            	System.out.println("uploadFiles Invalid remote directory: " + remoteDir);
+                throw new Exception("Invalid remote directory: " + remoteDir);
+            }
+            uploadFile(sftp, file, remoteDir);
 
         } catch (Exception e) {
             // System.out.println("Error uploading file: " + e.getMessage());

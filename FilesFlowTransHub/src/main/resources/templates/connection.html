@@ -37,7 +37,7 @@
 
                 <button type="submit" class="btn btn-primary">測試連線</button>
             </form>
-
+ 
             <div>
                 <h3 class="mt-4">檔案列表</h3>
                 <table class="table table-hover table-bordered">
@@ -59,44 +59,92 @@
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        document.getElementById('connectionForm').addEventListener('submit', function (event) {
-            event.preventDefault();  
 
-            const jsonInput = document.getElementById('jsonInput').value;
+   <script th:attr="nonce=${nonce}">
+    document.getElementById('connectionForm').addEventListener('submit', function (event) {
+        event.preventDefault();
 
-            let requestData;
-            try {
-                requestData = JSON.parse(jsonInput);   
-            } catch (error) {
-                alert('無效的 JSON 格式，請檢查您的資料。');
-                return;
-            }
+        const jsonInput = document.getElementById('jsonInput').value;
 
-            fetch('/api/connectionTest', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(requestData)
+        let requestData;
+        try {
+            requestData = JSON.parse(jsonInput);
+        } catch (error) {
+            alert('無效的 JSON 格式，請檢查您的資料。');
+            return;
+        }
+
+        fetch('/api/connectionTest', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(requestData),
+        })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(errorData => {
+                        throw new Error(
+                            Array.isArray(errorData.errors)
+                                ? errorData.errors.join('\n')  
+                                : errorData.errors || '未知的錯誤'  
+                        );
+                    });
+                }
+                return response.json();
             })
-            .then(response => response.json())
             .then(data => {
+                if (!data.success) {
+                    alert('連線測試失敗：\n' + 
+                        Array.isArray(data.errors)
+                            ? data.errors.join('\n')  
+                            : data.errors || '未知的錯誤'  
+                    );
+                    return;
+                }
+
+                // 成功處理檔案列表
                 const tableBody = document.getElementById('fileInfoTable');
-                tableBody.innerHTML = '';  
+                tableBody.innerHTML = '';
 
                 data.fileInfos.forEach(fileInfo => {
                     const row = document.createElement('tr');
-                    row.innerHTML = `<td>${fileInfo.name}</td><td>${fileInfo.size}</td><td>${fileInfo.lastModified}</td>`;
+
+                    const nameCell = document.createElement('td');
+                    nameCell.textContent = escapeHtml(fileInfo.name);
+
+                    const sizeCell = document.createElement('td');
+                    sizeCell.textContent = fileInfo.size;
+
+                    const lastModifiedCell = document.createElement('td');
+                    lastModifiedCell.textContent = fileInfo.lastModified;
+
+                    row.appendChild(nameCell);
+                    row.appendChild(sizeCell);
+                    row.appendChild(lastModifiedCell);
                     tableBody.appendChild(row);
                 });
 
                 document.getElementById('jsonOutput').textContent = JSON.stringify(data, null, 2);
             })
             .catch(error => {
-                alert('連線測試失敗，請檢查您的資料。');
+                alert('連線測試失敗：\n' + error.message);
             });
-        });
+    });
+        
+        function escapeHtml(unsafe) {
+            return unsafe.replace(/[&<>"']/g, function (match) {
+                const escapeChars = {
+                    '&': '&amp;',
+                    '<': '&lt;',
+                    '>': '&gt;',
+                    '"': '&quot;',
+                    "'": '&#39;'
+                };
+                return escapeChars[match];
+            });
+        }
+        
     </script>
 </body>
 </html>

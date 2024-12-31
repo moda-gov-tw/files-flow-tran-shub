@@ -32,7 +32,7 @@ public class SystemUtils {
 	 * @param length
 	 * @return
 	 */
-	private static String generateRandomAlphanumeric(int length) {
+	public static String generateRandomAlphanumeric(int length) {
 		
 		StringBuilder sb = new StringBuilder(length);
 
@@ -57,4 +57,34 @@ public class SystemUtils {
         info.setRemoteDir(isSource ? service.getSourcePath() : service.getTargetPath());
         return info;
     }
+	
+	/**
+	 * 允許的sftp 埠 
+	 * @param port 
+	 * @return
+	 */
+    public static boolean isAllowedPort(int port) {
+        return port == 22;  
+    }
+    /**
+     * 檢驗字元
+     * @param cred
+     * @return
+     */
+	public static boolean isValidCred(String cred) {
+	    if (cred == null || cred.length() > 50) {
+	        return false;
+	    }
+	    return cred.matches("^[a-zA-Z0-9!@#$%^&*()_+=-]*$"); 
+	}
+	
+	/**
+	 * 檢驗ip格式
+	 * @param ip
+	 * @return
+	 */
+	public static boolean isValidIPv4(String ip) {
+	    String ipv4Pattern = "^((25[0-5]|2[0-4][0-9]|[0-1]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[0-1]?[0-9][0-9]?)$";
+	    return ip.matches(ipv4Pattern);
+	}
 }
