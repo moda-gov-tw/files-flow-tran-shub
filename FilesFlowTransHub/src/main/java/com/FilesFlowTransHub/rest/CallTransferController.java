@@ -55,7 +55,7 @@ public class CallTransferController {
 			System.out.println(result.getFieldErrors());
 			ResponseInfo response = new ResponseInfo();
 			response.setStatusCode(CaseStatusConstEnum.ERROR.getKey());
-			response.setStatusMessage("請檢查所輸入的 serviceId 是否為 10 碼或是合規字元");
+			response.setStatusMessage("請檢查所輸入的 服務代碼(serviceId) 是否為 10 碼或是合規字元");
 			return response;
 		}
 		
@@ -65,7 +65,7 @@ public class CallTransferController {
 
 		if (!serviceService.isServiceIdValid(serviceId)) {
 			response.setStatusCode(CaseStatusConstEnum.ERROR.getKey());
-			response.setStatusMessage("此 serviceId 不存在或未開放");
+			response.setStatusMessage("此 服務代碼(serviceId) 不存在或未開放");
 		} else {
 			String caseId = SystemUtils.generateCaseId(serviceId);
 
