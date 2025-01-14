@@ -33,7 +33,19 @@ public class FileTransferService {
      * @param fileNameList
      */
     public void handleDownload(String caseId, ConnectionInfo sourceInfo, List<FileInfo> fileNameList) {
-         
+
+    	if (caseService.findByCaseId(caseId).size() <= 0) {
+            System.out.println("不存在的案件ID：" + caseId);
+            updateStatusWithError(caseId, "不存在的案件ID");
+            return;
+        }
+   
+    	if (isInvalidCaseId(caseId)) {
+            System.out.println("案件ID不是正確的案件ID：" + caseId);
+            updateStatusWithError(caseId, "案件ID不是正確的案件ID");
+            return;
+        }
+    	
         String targetDir = currentDir + "/" + caseId;
         File caseDir = new File(targetDir);
 
@@ -91,8 +103,20 @@ public class FileTransferService {
      */
     public void handleUpload(String caseId, ConnectionInfo targetInfo, List<FileInfo> fileNameList) {
         
-        String sourceUploadPath = currentDir + "/" + caseId;
-
+    	if (caseService.findByCaseId(caseId).size() <= 0) {
+            System.out.println("不存在的案件ID：" + caseId);
+            updateStatusWithError(caseId, "不存在的案件ID");
+            return;
+        }
+   
+    	if (isInvalidCaseId(caseId)) {
+            System.out.println("案件ID不是正確的案件ID：" + caseId);
+            updateStatusWithError(caseId, "案件ID不是正確的案件ID");
+            return;
+        }
+        
+    	String sourceUploadPath = currentDir + "/" + caseId;
+    	
         try {
             if (!SFTPFileTransUtils.isConnectionSuccess(targetInfo)) {
                 throw new Exception("SFTP 連線失敗");
@@ -121,5 +145,9 @@ public class FileTransferService {
     private void updateStatusWithError(String caseId, String message) {
         caseService.updateCaseStatus(caseId.substring(0, 10), caseId, CaseStatusConstEnum.ERROR.getKey());
         exceptionService.insertException(caseId.substring(0, 10), caseId, message);
+    }
+    
+    private boolean isInvalidCaseId(String caseId) {
+        return caseId.contains("..") || caseId.contains("/") || caseId.contains("\\");
     }
 }

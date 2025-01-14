@@ -1,15 +1,16 @@
 package com.FilesFlowTransHub.rest;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.FilesFlowTransHub.constant.CaseStatusConstEnum;
+
 import com.FilesFlowTransHub.dto.ConnectionInfo;
 import com.FilesFlowTransHub.dto.FileInfo;
-import com.FilesFlowTransHub.dto.ResponseInfo;
+import com.FilesFlowTransHub.service.AllowedHostService;
 import com.FilesFlowTransHub.util.SFTPFileTransUtils;
 import com.FilesFlowTransHub.util.SystemUtils;
 
@@ -25,7 +26,9 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api")
 public class ConnectionTestController {
-
+	@Autowired
+	private AllowedHostService allowedHostService;
+	
     @PostMapping("/connectionTest")
     public Map<String, Object> testConnection(@Valid @RequestBody ConnectionInfo info, BindingResult result) {  
     	Map<String, Object> response = new HashMap<>();
@@ -37,9 +40,9 @@ public class ConnectionTestController {
             return response;
         }
     	
-        if (!SystemUtils.isValidIPv4(info.getHost())) {
+        if (!SystemUtils.isValidIPv4(info.getHost()) || !allowedHostService.isAllowedHost(info.getHost())) {
             response.put("success", false);
-            response.put("errors", Collections.singletonList("不是合法的IP"));
+            response.put("errors", Collections.singletonList("不是合法的IP或主機不在允許的清單中"));
             return response;
         }
  
@@ -64,8 +67,4 @@ public class ConnectionTestController {
 
         return response;  
     }
-    
-
-
- 
 }

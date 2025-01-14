@@ -1,5 +1,6 @@
 package com.FilesFlowTransHub.controller;
  
+import java.util.Collections;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.PostMapping;
  
 import com.FilesFlowTransHub.domain.ServiceMain;
 import com.FilesFlowTransHub.dto.ServiceMainRequest;
+import com.FilesFlowTransHub.service.AllowedHostService;
 import com.FilesFlowTransHub.service.ServiceService;
 import com.FilesFlowTransHub.util.Base64Utils;
 import com.FilesFlowTransHub.util.SystemUtils;
@@ -24,7 +26,8 @@ import jakarta.validation.Valid;
 public class ServiceController {
 	@Autowired
 	private ServiceService serviceService;
-
+	@Autowired
+	private AllowedHostService allowedHostService;
 	@GetMapping("/service")
 	public String getServiceList(Model model) {
 
@@ -87,7 +90,20 @@ public class ServiceController {
 		    return "serviceDetails";
 		}
         
-        
+        if (!allowedHostService.isAllowedHost(serviceDTO.getSourceLocation())) {
+		    model.addAttribute("service", serviceDTO);
+		    model.addAttribute("editable", serviceDTO.getEditable());
+		    model.addAttribute("errorMessage", "來源位置IP欄位不是合法的IP或主機不在允許的清單中");
+		    return "serviceDetails";
+        }
+		
+        if (!allowedHostService.isAllowedHost(serviceDTO.getTargetLocation())) {
+		    model.addAttribute("service", serviceDTO);
+		    model.addAttribute("editable", serviceDTO.getEditable());
+		    model.addAttribute("errorMessage", "目標位置IP欄位不是合法的IP或主機不在允許的清單中");
+		    return "serviceDetails";
+        }
+		
 		if (!SystemUtils.isValidCred(serviceDTO.getSourceCred()) || !SystemUtils.isValidCred(serviceDTO.getTargetCred())) {
 		    model.addAttribute("service", serviceDTO);
 		    model.addAttribute("editable", serviceDTO.getEditable());

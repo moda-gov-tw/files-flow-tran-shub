@@ -52,3 +52,7 @@ CREATE TABLE fft_exception_main (
 	exception_message varchar(3000) NULL,
 	service_id varchar(10) NULL
 );
+CREATE TABLE fft_allowed_host (
+	id numeric(19) PRIMARY KEY,
+	allowed_host VARCHAR(255) 
+);

@@ -174,6 +174,7 @@ public class SFTPFileTransUtils {
      * @param destDir
      */
     public static void downFile(ConnectionInfo info, String fileName, String destDir) {
+    	
     	if (fileName.contains("..") || fileName.contains("/") || fileName.contains("\\")) {
     		System.out.println("downFile Invalid file name: " + fileName);
             throw new IllegalArgumentException("Invalid file name: " + fileName);
@@ -181,9 +182,9 @@ public class SFTPFileTransUtils {
     	
         ChannelSftp sftp = null;
         try {
-            sftp = newSFtpConnect(info);
+        	Path baseDestDir = Paths.get(destDir).toAbsolutePath().normalize(); 
             
-            File destDirectory = new File(destDir);
+            File destDirectory = new File(baseDestDir.toString());
             if (!destDirectory.exists() || !destDirectory.isDirectory()) {
             	System.out.println("downFile Invalid destination directory: " + destDir);
                 throw new Exception("Invalid destination directory: " + destDir);
@@ -191,7 +192,7 @@ public class SFTPFileTransUtils {
             
             // 下載
             String localFilePath = new File(destDirectory, fileName).getCanonicalPath();
-            Path baseDestDir = Paths.get(destDir).toAbsolutePath().normalize(); 
+            
             Path targetFilePath = Paths.get(localFilePath).toAbsolutePath().normalize();
             
             if (!targetFilePath.startsWith(baseDestDir)) {
@@ -199,7 +200,7 @@ public class SFTPFileTransUtils {
                 throw new Exception("Invalid destination file path: " + localFilePath);
             }
             
-            
+            sftp = newSFtpConnect(info);
             try (OutputStream outputStream = new FileOutputStream(localFilePath)) {
                 sftp.get(fileName, outputStream);
                 System.out.println("File downloaded successfully to: " + localFilePath);
@@ -221,15 +222,24 @@ public class SFTPFileTransUtils {
      * @throws Exception
      */
     public static void uploadFiles(ConnectionInfo info, String fileName, String srcDir) throws Exception {
-        ChannelSftp sftp = null;
+       
+        if (fileName.contains("..") || fileName.contains("/") || fileName.contains("\\")) {
+            throw new IllegalArgumentException("Invalid file name: " + fileName);
+        }
+    	
+    	ChannelSftp sftp = null;
+
         try {
             
-            sftp = newSFtpConnect(info);
-
+            Path baseSrcDir = Paths.get(srcDir).toAbsolutePath().normalize();
+            Path allowedDir = Paths.get(System.getProperty("user.dir")).toAbsolutePath().normalize();
             
-            File file = new File(srcDir, fileName);
-
+            if (baseSrcDir.toString().contains("..") || !baseSrcDir.startsWith(allowedDir)) {
+                throw new Exception("Invalid source directory: " + srcDir);
+            }
             
+            File file = new File(baseSrcDir.toString(), fileName);
+
             if (!file.exists() || !file.isFile()) {
                 throw new Exception("File does not exist: " + file.getAbsolutePath());
             }
@@ -245,6 +255,8 @@ public class SFTPFileTransUtils {
             	System.out.println("uploadFiles Invalid remote directory: " + remoteDir);
                 throw new Exception("Invalid remote directory: " + remoteDir);
             }
+            
+            sftp = newSFtpConnect(info);
             uploadFile(sftp, file, remoteDir);
 
         } catch (Exception e) {
@@ -264,6 +276,13 @@ public class SFTPFileTransUtils {
      * @throws Exception
      */
     private static void uploadFile(ChannelSftp sftp, File file, String remoteDir) throws Exception {
+    	
+        if (remoteDir.contains("..")) {
+        //if (remoteDir.contains("..") || remoteDir.contains("\\")) {
+        	System.out.println("uploadFiles Invalid remote directory: " + remoteDir);
+            throw new Exception("Invalid remote directory: " + remoteDir);
+        }
+    	
         try (FileInputStream fis = new FileInputStream(file)) {
             sftp.cd(remoteDir);
             sftp.put(fis, file.getName(), ChannelSftp.OVERWRITE);
