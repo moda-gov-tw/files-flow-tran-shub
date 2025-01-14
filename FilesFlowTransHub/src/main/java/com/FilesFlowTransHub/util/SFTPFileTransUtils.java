@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Properties;
 import java.util.Vector;
 
+import com.FilesFlowTransHub.domain.AllowedHost;
 import com.FilesFlowTransHub.dto.ConnectionInfo;
 import com.FilesFlowTransHub.dto.FileInfo;
 import com.jcraft.jsch.Channel;
@@ -167,6 +168,55 @@ public class SFTPFileTransUtils {
         return ret;
   
     }
+    
+    /**
+     * 檔案清單
+     * @param info
+     * @return
+     * @throws Exception
+     */
+    public static List<FileInfo> listFiles(ConnectionInfo info, List<AllowedHost> allowedHosts) throws Exception {
+    	ChannelSftp sftp = null;
+    	List<FileInfo> ret = new ArrayList<>();
+        try {
+        	boolean isValidHost = false;
+        	for (AllowedHost allowedHost : allowedHosts) {
+            	System.out.print(allowedHost);
+                if (allowedHost.getAllowedHost().equals(info.getHost())) {
+                	isValidHost = true;
+                }
+            }
+
+        	if (!isValidHost) {
+        		throw new Exception("不是合法的IP或主機不在允許的清單中: " + info.getHost());
+        	}
+        	
+        	sftp = newSFtpConnect(info);
+        	sftp.cd(info.getRemoteDir());
+            
+            // 列出當前路徑下的文件
+            Vector<?> fileList = sftp.ls(".");
+            
+            for (Object obj : fileList) {
+                if (obj instanceof LsEntry) {
+                    LsEntry entry = (LsEntry) obj;
+
+                    if (!entry.getAttrs().isDir() && !entry.getFilename().equals(".") && !entry.getFilename().equals("..")) {
+                        ret.add(new FileInfo(entry.getFilename(), entry.getAttrs().getSize(), entry.getAttrs().getMtimeString()));
+                        System.out.println("filename:"+entry.getFilename());
+                    }
+                }
+            }
+       
+        } catch (Exception e) {  
+            throw e;
+        } finally {
+            closeQuietly(sftp);
+        }
+        return ret;
+  
+    }
+    
     /**
      * 下載檔案
      * @param info

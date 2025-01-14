@@ -30,12 +30,6 @@ public class AllowedHostService {
 	 */
 	public boolean isAllowedHost(String host) {
         List<AllowedHost> allowedHosts = allowedHostRepository.findAll();
-        // 測試用
-        AllowedHost abc= new AllowedHost();
-        abc.setAllowedHost("192.168.56.103");
-        abc.setId((long) 1);;
-        allowedHosts.add(abc);
-        //
         System.out.print(allowedHosts.size());
         // 檢查是否有匹配的主機
         for (AllowedHost allowedHost : allowedHosts) {

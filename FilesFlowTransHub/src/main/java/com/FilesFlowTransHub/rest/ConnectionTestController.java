@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-
+import com.FilesFlowTransHub.domain.AllowedHost;
 import com.FilesFlowTransHub.dto.ConnectionInfo;
 import com.FilesFlowTransHub.dto.FileInfo;
 import com.FilesFlowTransHub.service.AllowedHostService;
@@ -40,9 +40,9 @@ public class ConnectionTestController {
             return response;
         }
     	
-        if (!SystemUtils.isValidIPv4(info.getHost()) || !allowedHostService.isAllowedHost(info.getHost())) {
+        if (!SystemUtils.isValidIPv4(info.getHost())) {
             response.put("success", false);
-            response.put("errors", Collections.singletonList("不是合法的IP或主機不在允許的清單中"));
+            response.put("errors", Collections.singletonList("不是合法的IP"));
             return response;
         }
  
@@ -54,7 +54,8 @@ public class ConnectionTestController {
         
         List<FileInfo> files = new ArrayList<>();
         try {
-            files = SFTPFileTransUtils.listFiles(info);  
+        	List<AllowedHost> allowedHosts = allowedHostService.findAll();
+            files = SFTPFileTransUtils.listFiles(info, allowedHosts);  
         } catch (Exception e) {
             e.printStackTrace();
             response.put("success", false);
