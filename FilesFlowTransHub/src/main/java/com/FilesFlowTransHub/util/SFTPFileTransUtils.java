@@ -27,6 +27,51 @@ import com.jcraft.jsch.SftpException;
 public class SFTPFileTransUtils {
  
 	/**
+	 * 檢核合法ip與建立sftp連線
+	 * @param info
+	 * @return
+	 * @throws Exception
+	 */
+    private static ChannelSftp newSFtpConnect(ConnectionInfo info, List<AllowedHost> allowedHosts) throws Exception {
+        JSch jsch = new JSch();
+        
+    	boolean isValidHost = false;
+    	for (AllowedHost allowedHost : allowedHosts) {
+        	System.out.print(allowedHost);
+            if (allowedHost.getAllowedHost().equals(info.getHost())) {
+            	isValidHost = true;
+            }
+        }
+
+    	if (!isValidHost) {
+    		throw new Exception("不是合法的IP或主機不在允許的清單中: " + info.getHost());
+    	}
+        
+        try {
+        	Properties sshConfig = new Properties();
+            // ssh的client端配置有一個選項StrictHostKeyChecking,預設是ask(yes>ask>no),
+            // 改no才會將主機key再連接時自動加入known_hosts
+            sshConfig.put("StrictHostKeyChecking", "no");
+            sshConfig.put("userauth.gssapi-with-mic", "no");
+            //sshConfig.put("cipher.s2c", "aes128-cbc");
+            //sshConfig.put("cipher.c2s", "aes128-cbc");
+            Session session = jsch.getSession(info.getAccount(), info.getHost(), info.getPort());
+            session.setPassword(info.getCred());
+            session.setConfig(sshConfig);
+            session.setTimeout(1000);
+            session.connect();
+            Channel channel = session.openChannel("sftp");
+            channel.connect();
+            ChannelSftp sftp = (ChannelSftp) channel;
+            changeDir(sftp, info.getRemoteDir());
+            return sftp;
+        } catch (Exception e) {
+        	System.out.println( e.getMessage());
+        	throw e;
+        }
+ 
+    }
+	/**
 	 * 建立sftp連線
 	 * @param info
 	 * @return
@@ -179,19 +224,8 @@ public class SFTPFileTransUtils {
     	ChannelSftp sftp = null;
     	List<FileInfo> ret = new ArrayList<>();
         try {
-        	boolean isValidHost = false;
-        	for (AllowedHost allowedHost : allowedHosts) {
-            	System.out.print(allowedHost);
-                if (allowedHost.getAllowedHost().equals(info.getHost())) {
-                	isValidHost = true;
-                }
-            }
-
-        	if (!isValidHost) {
-        		throw new Exception("不是合法的IP或主機不在允許的清單中: " + info.getHost());
-        	}
         	
-        	sftp = newSFtpConnect(info);
+        	sftp = newSFtpConnect(info, allowedHosts);
         	sftp.cd(info.getRemoteDir());
             
             // 列出當前路徑下的文件
