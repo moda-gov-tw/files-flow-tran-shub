@@ -40,14 +40,16 @@ public class SFTPFileTransUtils {
         }
         
     	boolean isValidHost = false;
+    	String validIp = "";
     	for (AllowedHost allowedHost : allowedHosts) {
         	System.out.print(allowedHost);
             if (allowedHost.getAllowedHost().equals(info.getHost())) {
+            	validIp = allowedHost.getAllowedHost();
             	isValidHost = true;
             }
         }
 
-    	if (!isValidHost) {
+    	if (!isValidHost || "".equals(validIp)) {
     		throw new Exception("不是合法的IP或主機不在允許的清單中: " + info.getHost());
     	}
         
@@ -59,7 +61,7 @@ public class SFTPFileTransUtils {
             sshConfig.put("userauth.gssapi-with-mic", "no");
             //sshConfig.put("cipher.s2c", "aes128-cbc");
             //sshConfig.put("cipher.c2s", "aes128-cbc");
-            Session session = jsch.getSession(info.getAccount(), info.getHost(), info.getPort());
+            Session session = jsch.getSession(info.getAccount(), validIp, info.getPort());
             session.setPassword(info.getCred());
             session.setConfig(sshConfig);
             session.setTimeout(1000);
