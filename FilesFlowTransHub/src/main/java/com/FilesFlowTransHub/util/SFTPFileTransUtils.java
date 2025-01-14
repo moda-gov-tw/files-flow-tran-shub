@@ -35,6 +35,10 @@ public class SFTPFileTransUtils {
     private static ChannelSftp newSFtpConnect(ConnectionInfo info, List<AllowedHost> allowedHosts) throws Exception {
         JSch jsch = new JSch();
         
+        if (!SystemUtils.isValidIPv4(info.getHost())) {
+        	throw new Exception("不是合法的IP或主機不在允許的清單中: " + info.getHost());
+        }
+        
     	boolean isValidHost = false;
     	for (AllowedHost allowedHost : allowedHosts) {
         	System.out.print(allowedHost);
