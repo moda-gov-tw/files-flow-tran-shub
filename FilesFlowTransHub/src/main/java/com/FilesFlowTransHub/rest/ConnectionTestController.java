@@ -40,9 +40,9 @@ public class ConnectionTestController {
             return response;
         }
     	
-        if (!SystemUtils.isValidIPv4(info.getHost()) || allowedHostService.isAllowedHost(info.getHost())) {
+        if (!SystemUtils.isValidIPv4(info.getHost()) || !allowedHostService.isAllowedHost(info.getHost())) {
             response.put("success", false);
-            response.put("errors", Collections.singletonList("不是合法的IP或主機不在允許的清單中"));
+            response.put("errors", Collections.singletonList("不是合法的IP或主機不在允許的清單中" + info.getHost()));
             return response;
         }
  
